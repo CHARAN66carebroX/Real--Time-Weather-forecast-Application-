@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server';
 import { kelvinToCelsius, msToKmh } from '@/lib/weatherUtils';
 import type { WeatherPayload, ApiError } from '@/lib/types';
 
-/** Regex: 1–100 chars, letters (including accented), spaces, hyphens, apostrophes */
-const CITY_REGEX = /^[a-zA-ZÀ-ÖØ-öø-ÿ\s'\-]{1,100}$/;
+/** Regex: 1–100 chars, letters (including accented/Unicode), spaces, hyphens, apostrophes, dots, commas */
+const CITY_REGEX = /^[\p{L}\s'\-.,]{1,100}$/u;
 
 /** Shape of the OWM /data/2.5/weather response we care about */
 interface OWMWeatherResponse {

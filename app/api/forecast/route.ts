@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server';
 import { kelvinToCelsius } from '@/lib/weatherUtils';
 import type { ForecastEntry, ForecastPayload, ApiError } from '@/lib/types';
 
-/** Regex: 1–100 chars, letters (including accented), spaces, hyphens, apostrophes */
-const CITY_REGEX = /^[a-zA-ZÀ-ÖØ-öø-ÿ\s'\-]{1,100}$/;
+/** Regex: 1–100 chars, letters (including accented/Unicode), spaces, hyphens, apostrophes, dots, commas */
+const CITY_REGEX = /^[\p{L}\s'\-.,]{1,100}$/u;
 
 /** Shape of a single 3-hour entry in the OWM /data/2.5/forecast response */
 interface OWMForecastEntry {

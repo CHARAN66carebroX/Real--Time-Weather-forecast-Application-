@@ -27,7 +27,7 @@ export function useWeather() {
   function getErrorMessage(status: number): string {
     switch (status) {
       case 404:
-        return 'City not found. Please check the spelling and try again.';
+        return 'City not found. Try the official city name (e.g. "Bengaluru" instead of "Bangalore").';
       case 502:
       case 503:
         return 'Weather service is currently unavailable. Try again later.';
@@ -104,20 +104,31 @@ export function useWeather() {
 
   async function geolocate() {
     if (isRequestInFlight.current) return;
+    isRequestInFlight.current = true;
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-    const result = await getCoordinates();
+    try {
+      const result = await getCoordinates();
 
-    if (!result.ok) {
-      const message =
-        result.code === 'PERMISSION_DENIED'
-          ? 'Location access denied. Please search by city name.'
-          : 'Unable to retrieve your location. Please search by city name.';
-      setState(prev => ({ ...prev, isLoading: false, error: message }));
-      return;
+      if (!result.ok) {
+        const message =
+          result.code === 'PERMISSION_DENIED'
+            ? 'Location access denied. Please search by city name.'
+            : 'Unable to retrieve your location. Please search by city name.';
+        setState(prev => ({ ...prev, isLoading: false, error: message }));
+        isRequestInFlight.current = false;
+        return;
+      }
+
+      await fetchWeather(`lat=${result.lat}&lon=${result.lon}`, `${result.lat},${result.lon}`);
+    } catch {
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Unable to retrieve your location. Please search by city name.',
+      }));
+      isRequestInFlight.current = false;
     }
-
-    await fetchWeather(`lat=${result.lat}&lon=${result.lon}`, `${result.lat},${result.lon}`);
   }
 
   function dismissError() {
